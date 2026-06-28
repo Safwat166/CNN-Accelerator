@@ -13,7 +13,8 @@ module control_buff_input (
 
     output reg [12:0] read_address_input,
     output reg        valid_add,
-    output reg        initial_window
+    output reg        initial_window,
+    output reg        done_slice
 );
 
 reg     [1:0]   counter;
@@ -21,7 +22,6 @@ reg     [12:0]  row_ptr_ifmap_w;
 reg     [12:0]  coulmn_ptr_ifmap_h;
 reg     [12:0]  normal_ptr , reuse_base;
 reg             flag;
-reg             done_slice;
 
 // Calculate Number of 16 coulmns needed to finish Ifmap -- divide by 16 ex (64 / 16 = 4)
 // so need 4 window of 16 coulmns to finish IFmap height
@@ -180,7 +180,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                                 read_address_input <= 0;
                                 normal_ptr <= 0;
                                 row_ptr_ifmap_w <= 0;
-                                valid_add <= 0;
+                                // valid_add <= 0;
                             end else begin // normal case
                                 normal_ptr <= normal_ptr + 1;
                                 row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
@@ -381,7 +381,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                 read_address_input <= reuse_base;
                 if(done_slice) begin
                     done_slice <= 0;
-                    valid_add <= 0;
+                    valid_add <= 1;
                     coulmn_ptr_ifmap_h <= 0;
                     normal_ptr <= 0;
                     row_ptr_ifmap_w <= 0;

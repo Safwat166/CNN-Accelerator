@@ -11,6 +11,7 @@ module control_buff_top(
     output  wire     [12:0] read_address_input,
     output  wire            initial_window,
     output  wire            valid_add_input,
+    output  wire            done_slice,
     // ----------- Weight Buffer  ----------------
     input   wire    [1:0]   req_weight,
     //input   wire    [7:0]   reg_filter_size,
@@ -40,7 +41,8 @@ control_buff_input instance_input(
     .req_3_col(req_3_col),          
     .read_address_input(read_address_input),
     .valid_add(valid_add_input),
-    .initial_window(initial_window)
+    .initial_window(initial_window),
+    .done_slice(done_slice)
 );
 
 // weight Buffer

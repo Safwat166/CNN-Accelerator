@@ -102,7 +102,15 @@ module fsm #(
         else next_state = special_load_state;
       end
       output_state: begin
-        next_state = clear == 1 ? idle_state : start_up_state;
+        if(clear) begin
+          next_state =idle_state;
+        end
+        else if (load_buffers_done == 0) begin
+          next_state = idle_state;
+        end
+        else begin
+          next_state = start_up_state;
+        end
       end
       default: next_state = idle_state;
     endcase

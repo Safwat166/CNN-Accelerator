@@ -22,7 +22,7 @@ module PE_Array_Top (
                 .available_data (available_data),
                 .in_element     (OUT_A[i*8 +: 8]),
                 .in_filter      (filter_in1),
-                .pe_out         (pe_out[i*28 +: 28])
+                .pe_out         (pe_out[i*28 +: 28])     
             );
             PE pe_b (
                 .CLK            (CLK), 

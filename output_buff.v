@@ -13,7 +13,7 @@ module output_buff(
 
 reg [127:0] mem [8191:0]; // 8192 locations and each location is 128 bit
 
-always @(posedge clk or negedge rst_n) begin
+always @(posedge clk) begin
     if(~rst_n) begin
         data_out <= 128'b0;
         data_valid <= 1'b0;

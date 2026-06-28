@@ -5,7 +5,7 @@ module RegFile #(parameter DATA_WIDTH = 128 , Address_Width = 2)
     input   wire                        rst_n,
     input   wire    [DATA_WIDTH-1:0]    wdata,
     input   wire    [Address_Width-1:0] Address_in,
-    input   wire                        we,
+    input   wire                        block_enable_r,
     output  wire    [DATA_WIDTH-1:0]    rdata,
 
     // Design Interface
@@ -15,7 +15,7 @@ module RegFile #(parameter DATA_WIDTH = 128 , Address_Width = 2)
     output   reg      [12:0]            reg_ifmap_w,      // Ifmap Width
     output   reg      [7:0]             reg_filter_size,  
     output   reg      [7:0]             reg_channel_id,
-    output   reg                        load_20_percent_buffers_done,
+    output   reg                        load_25_percent_buffers_done,
 
     input   wire                        valid_out,
     input   wire                        done_slice
@@ -28,7 +28,7 @@ module RegFile #(parameter DATA_WIDTH = 128 , Address_Width = 2)
     //   [28:16]  reg_ifmap_h                 (CPU write)
     //   [41:29] reg_ifmap_w                  (CPU write)
     //   [42]    last_location                (CPU write)
-    //   [43]    load_20_percent_buffers_done (CPU write)
+    //   [43]    load_25_percent_buffers_done (CPU write)
     //   [44]    valid_out                    (Design write)
     //   [45]    done_slice                   (Design write)
 
@@ -40,14 +40,14 @@ module RegFile #(parameter DATA_WIDTH = 128 , Address_Width = 2)
     //--------------------------------------------------
     // Write Logic
     //--------------------------------------------------
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             mem[0] <= {DATA_WIDTH{1'b0}};
             mem[1] <= {DATA_WIDTH{1'b0}};
         end
         else begin
             // CPU write
-            if (we) begin
+            if (block_enable_r) begin
                 mem[Address_in] <= wdata;
             end
             mem[0][44] <= valid_out;
@@ -69,6 +69,6 @@ module RegFile #(parameter DATA_WIDTH = 128 , Address_Width = 2)
         reg_ifmap_h                   = mem[0][28:16];
         reg_ifmap_w                   = mem[0][41:29];
         last_location                 = mem[0][42];
-        load_20_percent_buffers_done  = mem[0][43];
+        load_25_percent_buffers_done  = mem[0][43];
     end
 endmodule

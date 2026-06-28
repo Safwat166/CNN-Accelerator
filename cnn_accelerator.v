@@ -71,13 +71,14 @@ module cnn_accelerator #(
 
 
     // interface of Regfile
-    reg [7:0]    filter_size;
-    reg          load_buffers_done;
-    reg [7:0]    ch_id;
-    reg          clear;
-    reg [12:0]   ifmap_h;
-    reg [12:0]   ifmap_w;
-    wire         valid_out;
+    wire [7:0]    filter_size;
+    wire          load_buffers_done;
+    wire [7:0]    ch_id;
+    wire [12:0]   ifmap_h;
+    wire [12:0]   ifmap_w;
+    wire          valid_out;
+    wire          last_location;
+    wire          done_slice;
 
     // interface of output logic
     wire [127:0]  psum_ch;
@@ -88,6 +89,7 @@ module cnn_accelerator #(
     wire [783:0]  final_out;
     wire [127:0]  stream_out;
     wire [783:0]  stream_psum;
+    wire          valid_out_1;
 
     /*--------------------------------------------------
     -- computational unit
@@ -166,7 +168,8 @@ module cnn_accelerator #(
         .valid_add_input(valid_add_in),
         .valid_add_weight(valid_add_w),
         .valid_add_out(valid_add_o),
-        .valid_add_psum(valid_add_p)
+        .valid_add_psum(valid_add_p),
+        .done_slice(done_slice)
     );
 
     /*--------------------------------------------------
@@ -210,7 +213,7 @@ module cnn_accelerator #(
         .block_enable(block_enable_o),
         .data_in(stream_out),
         .data_out(data_bus_o),
-        .data_valid(valid_out),
+        .data_valid(valid_out_1),
         .valid_add(valid_add_o)
     );
 
@@ -231,26 +234,22 @@ module cnn_accelerator #(
     /*--------------------------------------------------
     -- register file
     --------------------------------------------------*/
-    always @ (posedge clk or negedge rst_n) begin
-        if(!rst_n) begin
-            filter_size <= 0;
-            load_buffers_done <= 0;
-            ch_id <= 0;
-            clear <= 0;
-            ifmap_h <= 0;
-            ifmap_w <= 0;
-        end
-        else begin
-            if(block_enable_r) begin
-                filter_size <= data_bus[7:0];
-                load_buffers_done <= data_bus[8];
-                ch_id <= data_bus[16:9];
-                clear <= data_bus[17];
-                ifmap_h <= data_bus[30:18];
-                ifmap_w <= data_bus[43:31];
-            end
-        end
-    end
+    RegFile RegFile_inst(
+        .clk(clk),
+        .rst_n(rst_n),
+        .wdata(data_bus),
+        .Address_in(address),
+        .block_enable_r(block_enable_r),
+        .rdata(data_bus_o),
+        .last_location(last_location),
+        .reg_ifmap_h(ifmap_h),
+        .reg_ifmap_w(ifmap_w),
+        .reg_filter_size(filter_size),
+        .reg_channel_id(ch_id),
+        .load_25_percent_buffers_done(load_buffers_done),
+        .valid_out(valid_out),
+        .done_slice(done_slice)
+    );
 
     /*--------------------------------------------------
     -- output logic
@@ -275,7 +274,8 @@ module cnn_accelerator #(
         .valid(en_pe_reg),
         .data_in(final_out),
         .en(valid_in),
-        .data_out(stream_out)
+        .data_out(stream_out),
+        .valid_out(valid_out)
     );
 
     adder_array adder_array_inst(

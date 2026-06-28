@@ -19,9 +19,10 @@ module PE (
         else begin 
 		if (clear) begin
                  acc_reg <= 24'b0;
-        end else if (en_pe && available_data) begin
-			    acc_reg <= acc_reg + (in_element * in_filter);
-		end
+            end  else if (en_pe && available_data) begin
+           
+				 acc_reg <= acc_reg + (in_element * in_filter);
+				end
 		end
 		end
 
