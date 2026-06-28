@@ -5,10 +5,9 @@ Enter filter size, then for each subfilter enter:
   - Register A, B, C, D (hex)
   - Subfilter weights (hex)
 
-The model accumulates across subfilters and outputs the 728-bit hex result.
+The model accumulates across subfilters and outputs the 784-bit hex result.
 """
 import numpy as np
-
 
 def parse_register(hex_str):
     s = hex_str.strip().zfill(32)
@@ -25,12 +24,12 @@ def conv_2x14(rows, filt):
     w = np.array(rows, dtype=object)
     f = np.array(filt, dtype=object)
     result = np.zeros((2, 14), dtype=object)
-    for r in range(2):
-        for c in range(14):
-            result[r, c] = int(np.sum(w[r:r+3, c:c+3] * f))
+    for r in range(2):   ## 2 vertical output pixel
+        for c in range(14): ## 14 tile in horizontal direction --> so 2x14 = 28 output pixel
+            result[r, c] = int(np.sum(w[r:r+3, c:c+3] * f)) ## accumulate input activations and weights
     return result
 
-
+#combine the results from a, b
 def pack_784bit(result):
     packed = 0
     ordered_vals = []
@@ -62,33 +61,35 @@ def pack_784bit(result):
 
 
 def compare_outputs():
+    cnt = 0
     try:
         with open("golden_model/pe_out.dat", "r") as f1, open("golden_model/output_golden_raw.dat", "r") as f2:
             pe_out_lines = [l.strip() for l in f1.readlines() if l.strip()]
             golden_lines = [l.strip() for l in f2.readlines() if l.strip()]
 
+        total_golden_lines = len(golden_lines)
+
         if len(pe_out_lines) != len(golden_lines):
             print(f"Failed: Line count mismatch (pe_out.dat has {len(pe_out_lines)}, output_golden_raw.dat has {len(golden_lines)})")
             return
 
+
+        ## comparing mechanism
         all_passed = True
         for i, (out_val, gold_val) in enumerate(zip(pe_out_lines, golden_lines)):
-            print(f"--- Window {i+1} ---")
             if out_val == gold_val:
-                print("passed")
+                cnt = cnt + 1
             else:
                 print("failed")
                 all_passed = False
-                
-            print(f"golden value:\n{gold_val}")
-            print(f"output value:\n{out_val}")
             
             if not all_passed:
                 print("Stopping comparison on first failure.")
                 break
                 
         if all_passed:
-            print("\nAll windows matched successfully!")
+            print("All pe_out matched successfully!")
+            print(f"number of passed pe_out: {cnt}/{total_golden_lines}")
             
     except FileNotFoundError as e:
         print(f"\nComparison skipped: {e}")
@@ -101,7 +102,7 @@ def main():
         print("filter_size.dat not found, defaulting to 3")
         K = 3
 
-    num_sub = (K // 3) ** 2
+    num_sub = (K // 3) ** 2  ## number of subfilters
     print(f"Filter {K}x{K} -> {num_sub} subfilter(s)")
 
     try:
@@ -137,7 +138,7 @@ def main():
                 parse_register(windows[i+3])
             ])
 
-    print(f"Total complete windows found: {len(parsed_windows)}")
+    print(f"Total number of  sub-windows found: {len(parsed_windows)}")
 
     with open("golden_model/output_golden.dat", "w") as out_file, open("golden_model/output_golden_raw.dat", "w") as raw_file:
         for i in range(0, len(parsed_windows), num_sub):
@@ -157,8 +158,6 @@ def main():
             stream_out, raw_out = pack_784bit(accum)
             out_file.write(stream_out + "\n")
             raw_file.write(raw_out + "\n")
-
-    print("Successfully generated output_golden.dat and output_golden_raw.dat")
     
     # Run the comparison
     compare_outputs()
