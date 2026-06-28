@@ -6,35 +6,57 @@ add wave -noupdate /cnn_accelerator_tb/DUT/input_activations
 add wave -noupdate /cnn_accelerator_tb/DUT/valid_input
 add wave -noupdate /cnn_accelerator_tb/DUT/filter_in
 add wave -noupdate /cnn_accelerator_tb/DUT/comp_inst/valid_weight
-add wave -noupdate -expand -group {system states} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/fsm_U/current_state
-add wave -noupdate -expand -group {system states} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/fsm_U/next_state
-add wave -noupdate -expand -group {system states} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/request_input
-add wave -noupdate -expand -group {system states} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/request_weight
-add wave -noupdate -expand -group {system states} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/request_output
-add wave -noupdate -expand -group {system states} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/request_psums
-add wave -noupdate -expand -group address -color Cyan /cnn_accelerator_tb/DUT/control_buff_inst/read_address_input
-add wave -noupdate -expand -group address -color Cyan /cnn_accelerator_tb/DUT/control_buff_inst/read_address_weight
-add wave -noupdate -expand -group address -color Cyan /cnn_accelerator_tb/DUT/control_buff_inst/write_address_output
-add wave -noupdate -expand -group address -color Cyan /cnn_accelerator_tb/DUT/control_buff_inst/read_address_psum
-add wave -noupdate -expand -group {status signals} -color Thistle /cnn_accelerator_tb/DUT/initial_window
-add wave -noupdate -expand -group {status signals} -color Thistle /cnn_accelerator_tb/DUT/comp_inst/clear_pe
-add wave -noupdate -expand -group {status signals} -color Thistle /cnn_accelerator_tb/DUT/load_done
-add wave -noupdate -expand -group {status signals} -color Thistle /cnn_accelerator_tb/DUT/load_done_w
-add wave -noupdate -expand -group {status signals} -color Thistle /cnn_accelerator_tb/DUT/finished_op
-add wave -noupdate -expand -group {status signals} -color Thistle /cnn_accelerator_tb/DUT/req_3col
-add wave -noupdate -expand -group {status signals} -color Thistle /cnn_accelerator_tb/DUT/comp_inst/available_data
-add wave -noupdate -expand -group {status signals} -color Thistle /cnn_accelerator_tb/DUT/row_transition
-add wave -noupdate -expand -group {reorder window} -color Gold /cnn_accelerator_tb/DUT/comp_inst/reorder_module_inst/wire_A
-add wave -noupdate -expand -group {reorder window} -color Gold /cnn_accelerator_tb/DUT/comp_inst/reorder_module_inst/wire_B
-add wave -noupdate -expand -group {reorder window} -color Gold /cnn_accelerator_tb/DUT/comp_inst/reorder_module_inst/wire_C
-add wave -noupdate -expand -group {reorder window} -color Gold /cnn_accelerator_tb/DUT/comp_inst/reorder_module_inst/wire_D
-add wave -noupdate -expand -group {pe array output} -color Cyan /cnn_accelerator_tb/DUT/pe_out
-add wave -noupdate /cnn_accelerator_tb/DUT/stream_out
+add wave -noupdate -group AXI /cnn_accelerator_tb/data_bus
+add wave -noupdate -group AXI -radix unsigned /cnn_accelerator_tb/address
+add wave -noupdate -group AXI -color Yellow /cnn_accelerator_tb/block_enable_i
+add wave -noupdate -group AXI -color Yellow /cnn_accelerator_tb/block_enable_w
+add wave -noupdate -group AXI -color Yellow /cnn_accelerator_tb/block_enable_o
+add wave -noupdate -group AXI -color Yellow /cnn_accelerator_tb/block_enable_r
+add wave -noupdate -group AXI -color Yellow /cnn_accelerator_tb/block_enable_ps
+add wave -noupdate -group AXI -color {Cornflower Blue} /cnn_accelerator_tb/wr_en_i
+add wave -noupdate -group AXI -color {Cornflower Blue} /cnn_accelerator_tb/wr_en_w
+add wave -noupdate -group AXI -color {Cornflower Blue} /cnn_accelerator_tb/wr_en_o
+add wave -noupdate -group AXI -color {Cornflower Blue} /cnn_accelerator_tb/wr_en_p
+add wave -noupdate -group AXI -color Magenta /cnn_accelerator_tb/rd_en_i
+add wave -noupdate -group AXI -color Magenta /cnn_accelerator_tb/rd_en_w
+add wave -noupdate -group AXI -color Magenta /cnn_accelerator_tb/rd_en_o
+add wave -noupdate -group AXI -color Magenta /cnn_accelerator_tb/rd_en_p
+add wave -noupdate -expand -group {status signals} /cnn_accelerator_tb/DUT/done_slice
+add wave -noupdate -expand -group {status signals} -radix unsigned /cnn_accelerator_tb/DUT/ifmap_h
+add wave -noupdate -expand -group {status signals} -radix unsigned /cnn_accelerator_tb/DUT/ifmap_w
+add wave -noupdate -expand -group {status signals} /cnn_accelerator_tb/DUT/valid_out
+add wave -noupdate -expand -group {status signals} /cnn_accelerator_tb/DUT/done_slice
+add wave -noupdate -expand -group {status signals} /cnn_accelerator_tb/DUT/load_buffers_done
+add wave -noupdate -group {system states and data requests} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/fsm_U/current_state
+add wave -noupdate -group {system states and data requests} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/fsm_U/next_state
+add wave -noupdate -group {system states and data requests} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/request_input
+add wave -noupdate -group {system states and data requests} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/request_weight
+add wave -noupdate -group {system states and data requests} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/request_output
+add wave -noupdate -expand -group {generated addresses} -color Cyan -radix unsigned /cnn_accelerator_tb/DUT/control_buff_inst/read_address_input
+add wave -noupdate -expand -group {generated addresses} -color Cyan /cnn_accelerator_tb/DUT/control_buff_inst/read_address_weight
+add wave -noupdate -expand -group {generated addresses} -color Cyan -radix unsigned /cnn_accelerator_tb/DUT/control_buff_inst/write_address_output
+add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/en_op
+add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/comp_inst/clear_pe
+add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/load_done
+add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/load_done_w
+add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/finished_op
+add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/req_3col
+add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/comp_inst/available_data
+add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/row_transition
+add wave -noupdate -group outputs -color Cyan /cnn_accelerator_tb/DUT/stream_out
+add wave -noupdate -group outputs -color Cyan /cnn_accelerator_tb/DUT/pe_out
+add wave -noupdate -group outputs -color Cyan /cnn_accelerator_tb/DUT/pe_stream_buffer_inst/en
+add wave -noupdate -group outputs -color Cyan /cnn_accelerator_tb/DUT/en_pe_reg
+add wave -noupdate -group {vertical slice pointer} -color Yellow -radix unsigned /cnn_accelerator_tb/DUT/control_buff_inst/instance_input/coulmn_ptr_ifmap_h
+add wave -noupdate -group {vertical slice pointer} -radix unsigned /cnn_accelerator_tb/DUT/control_buff_inst/instance_input/total_16_coulmn_window
+add wave -noupdate -group {input buffer} /cnn_accelerator_tb/DUT/input_buff_inst/mem
+add wave -noupdate -group {weight buffer} /cnn_accelerator_tb/DUT/weight_buff_inst/mem
+add wave -noupdate -group {output buffer} /cnn_accelerator_tb/DUT/output_buff_inst/mem
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {5163406 ps} 0}
+WaveRestoreCursors {{Cursor 1} {20736607 ps} 0}
 quietly wave cursor active 1
-configure wave -namecolwidth 294
-configure wave -valuecolwidth 163
+configure wave -namecolwidth 234
+configure wave -valuecolwidth 298
 configure wave -justifyvalue left
 configure wave -signalnamewidth 1
 configure wave -snapdistance 10
@@ -47,4 +69,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {3371120 ps} {10134013 ps}
+WaveRestoreZoom {20695970 ps} {20866139 ps}
