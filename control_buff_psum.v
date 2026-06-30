@@ -3,6 +3,7 @@ module control_buff_psum(
     input   wire            req_psum,
 
     output  reg             valid_add,
+    output  reg             rden_psum,
     output  reg     [12:0]  read_address_psum
 );
 
@@ -15,10 +16,12 @@ always @ (posedge clk or negedge rst_n) begin
         psum_ptr <= 0;
         read_address_psum <= 0;
         valid_add <= 0;
+        rden_psum <= 0;
     end else if (req_psum_reg) begin
         read_address_psum <= psum_ptr;
         psum_ptr <= psum_ptr + 1;
         valid_add <= 1;
+        rden_psum <= 1;
     end
 end
 

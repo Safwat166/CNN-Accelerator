@@ -13,7 +13,7 @@ module control_buff_input (
 
     output reg [12:0] read_address_input,
     output reg        valid_add,
-    output reg        initial_window,
+    output reg        rden,
     output reg        done_slice
 );
 
@@ -40,8 +40,10 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
         valid_add <= 0;
         flag <= 0;
         done_slice <= 0;
+        rden <= 0;
     end else begin
         valid_add <= 0;
+        rden <= 0;
         if (request == 2'b01) begin // first window
             case (counter)
                 0 : begin
@@ -50,6 +52,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                     row_ptr_ifmap_w <= 0;
                     coulmn_ptr_ifmap_h <= 0;
                     read_address_input <= normal_ptr;
+                    rden <= 1;
                     counter <= counter + 1;
                     valid_add <= 1;
                 end
@@ -59,6 +62,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                     row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                     counter <= counter + 1;
                     valid_add <= 1;
+                    rden <= 1;
                 end
                 2 : begin
                     read_address_input <= normal_ptr;
@@ -66,6 +70,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                     counter <= counter + 1;
                     row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                     valid_add <= 1;
+                    rden <= 1;
                 end
                 3 : begin
                     read_address_input <= normal_ptr;
@@ -73,6 +78,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                     row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                     counter <= 0;
                     valid_add <= 1;
+                    rden <= 1;
                 end
             endcase
         end else if (request == 2'b10) begin // filter is 3*3 and request new window "first was 0 - 3"second -- (2 -- 5)
@@ -88,12 +94,14 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                         normal_ptr <= normal_ptr + 1;
                         reuse_base <= normal_ptr + reg_ifmap_w;
                         valid_add <= 1;
+                        rden <= 1;
                     end else begin
                         normal_ptr <= normal_ptr - 1;
                         reuse_base <= ( normal_ptr - 2 ) + reg_ifmap_w;
                         read_address_input <= normal_ptr - 1 - 1;
                         row_ptr_ifmap_w <= row_ptr_ifmap_w - 1;
                         valid_add <= 1;
+                        rden <= 1;
                         // normal_ptr <= (coulmn_ptr_ifmap_h +1 ) * reg_ifmap_w; 
                     end
                 end
@@ -102,7 +110,8 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                     read_address_input <= normal_ptr;
                     row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                     counter <= counter + 1;
-                    valid_add <= 1;                
+                    valid_add <= 1;   
+                    rden <= 1;             
                 end
                 2 : begin
                     normal_ptr <= normal_ptr + 1;
@@ -110,11 +119,13 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                     row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                     counter <= counter + 1;
                     valid_add <= 1;
+                    rden <= 1;
                 end
                 3 : begin
                     counter <= 0;
                     // Always output the 4th address for the current window
                     read_address_input <= normal_ptr;
+                    rden <= 1;
                     if(row_ptr_ifmap_w >= (reg_ifmap_w - 2)) begin // last window of slice
                         flag <= 1;
                         normal_ptr <= (coulmn_ptr_ifmap_h + 1) * reg_ifmap_w;
@@ -122,15 +133,18 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                         coulmn_ptr_ifmap_h <= coulmn_ptr_ifmap_h + 1;
                         reuse_base <= (coulmn_ptr_ifmap_h + 1) * reg_ifmap_w;
                         valid_add <= 1;
+                        rden <= 1;
                         if(coulmn_ptr_ifmap_h == (total_16_coulmn_window -1) ) begin
                             done_slice <= 1;
                             normal_ptr <=0;
                             coulmn_ptr_ifmap_h <= 0;
+                            rden <= 1;
                         end
                     end else begin // normal case
                         normal_ptr <= normal_ptr + 1;
                         row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                         valid_add <= 1;
+                        rden <= 1;
                     end
                 end
             endcase
@@ -146,8 +160,8 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                                 counter <= counter + 1;
                                 row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                                 valid_add <= 1;
-                                initial_window <= 1;
                                 flag <= 0;
+                                rden <= 1;
                             end
                             else begin
                                 normal_ptr <= normal_ptr - 5;
@@ -156,6 +170,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                                 counter <= counter + 1;
                                 row_ptr_ifmap_w <= row_ptr_ifmap_w - 5;
                                 valid_add <= 1;
+                                rden <= 1;
                             end
                         end
                         1 : begin
@@ -164,6 +179,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                             counter <= counter + 1;
                             row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                             valid_add <= 1;
+                            rden <= 1;
                         end
                         2 : begin
                             normal_ptr <= normal_ptr + 1;
@@ -171,11 +187,13 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                             counter <= counter + 1;
                             row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                             valid_add <= 1;
+                            rden <= 1;
                         end
                         3 : begin
                             counter <= 0;
                             read_address_input <= normal_ptr;
                             valid_add <= 1;
+                            rden <= 1;
                             if((coulmn_ptr_ifmap_h >= (total_16_coulmn_window-1)) && (row_ptr_ifmap_w >= (reg_ifmap_w-1))) begin
                                 read_address_input <= 0;
                                 normal_ptr <= 0;
@@ -198,7 +216,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                                 normal_ptr <= normal_ptr + 1;
                                 reuse_base <= normal_ptr + reg_ifmap_w;
                                 valid_add <= 1;
-                                initial_window <= 1;
+                                rden <= 1;
                             end
                             else begin
                                 normal_ptr <= normal_ptr - 9;
@@ -207,6 +225,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                                 counter <= counter + 1;
                                 row_ptr_ifmap_w <= row_ptr_ifmap_w - 9;
                                 valid_add <= 1;
+                                rden <= 1;
                             end
                         end
                         1 : begin
@@ -215,6 +234,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                             counter <= counter + 1;
                             row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                             valid_add <= 1;
+                            rden <= 1;
                         end
                         2 : begin
                             normal_ptr <= normal_ptr + 1;
@@ -222,12 +242,13 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                             counter <= counter + 1;
                             row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                             valid_add <= 1;
+                            rden <= 1;
                         end
                         3 : begin
                             counter <= 0;
                             read_address_input <= normal_ptr;
                             valid_add <= 1;
-
+                            rden <= 1;
                             if((coulmn_ptr_ifmap_h >= total_16_coulmn_window) && (row_ptr_ifmap_w >= reg_ifmap_w)) begin
                                 read_address_input <= 0;
                                 normal_ptr <= 0;
@@ -251,7 +272,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                                 normal_ptr <= normal_ptr + 1;
                                 reuse_base <= normal_ptr + reg_ifmap_w;
                                 valid_add <= 1;
-                                initial_window <= 1;
+                                rden <= 1;
                             end
                             else begin
                                 normal_ptr <= normal_ptr - 13;
@@ -260,6 +281,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                                 counter <= counter + 1;
                                 row_ptr_ifmap_w <= row_ptr_ifmap_w - 13;
                                 valid_add <= 1;
+                                rden <= 1;
                             end
                         end
                         1 : begin
@@ -268,6 +290,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                             counter <= counter + 1;
                             row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                             valid_add <= 1;
+                            rden <= 1;
                         end
                         2 : begin
                             normal_ptr <= normal_ptr + 1;
@@ -275,12 +298,13 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                             counter <= counter + 1;
                             row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                             valid_add <= 1;
+                            rden <= 1;
                         end
                         3 : begin
                             counter <= 0;
                             read_address_input <= normal_ptr;
                             valid_add <= 1;
-
+                            rden <= 1;
                             if((coulmn_ptr_ifmap_h >= total_16_coulmn_window) && (row_ptr_ifmap_w >= reg_ifmap_w)) begin
                                 read_address_input <= 0;
                                 normal_ptr <= 0;
@@ -304,7 +328,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                                 normal_ptr <= normal_ptr + 1;
                                 reuse_base <= normal_ptr + reg_ifmap_w;
                                 valid_add <= 1;
-                                initial_window <= 1;
+                                rden <= 1;
                             end
                             else begin
                                 normal_ptr <= normal_ptr - 17;
@@ -313,6 +337,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                                 counter <= counter + 1;
                                 row_ptr_ifmap_w <= row_ptr_ifmap_w - 17;
                                 valid_add <= 1;
+                                rden <= 1;
                             end
                         end
                         1 : begin
@@ -321,6 +346,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                             counter <= counter + 1;
                             row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                             valid_add <= 1;
+                            rden <= 1;
                         end
                         2 : begin
                             normal_ptr <= normal_ptr + 1;
@@ -328,11 +354,13 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                             counter <= counter + 1;
                             row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                             valid_add <= 1;
+                            rden <= 1;
                         end
                         3 : begin
                             counter <= 0;
                             read_address_input <= normal_ptr;
                             valid_add <= 1;
+                            rden <= 1;
                             if((coulmn_ptr_ifmap_h >= total_16_coulmn_window) && (row_ptr_ifmap_w >= reg_ifmap_w)) begin
                                 read_address_input <= 0;
                                 normal_ptr <= 0;
@@ -349,7 +377,8 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                 default : begin
                     read_address_input <= 0;
                     counter <= 0;
-                    valid_add <= 1;
+                    valid_add <= 0;
+                    rden <= 0;
                 end
             endcase
         end else if (req_3_col) begin // need 3 col for reuse
@@ -359,18 +388,21 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                 read_address_input <= reuse_base;
                 counter <= counter + 1;
                 valid_add <= 1;
+                rden <= 1;
             end
             1 : begin
                 reuse_base <= reuse_base + 1;
                 read_address_input <= reuse_base;
                 counter <= counter + 1;
                 valid_add <= 1;
+                rden <= 1;
             end
             2 : begin
                 reuse_base <= reuse_base + 1;
                 read_address_input <= reuse_base;
                 counter <= counter + 1;
                 valid_add <= 1;
+                rden <= 1;
             end
             3 : begin
                 /*reuse_base <= reuse_base + 1;
@@ -379,12 +411,14 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                 valid_add <= 1;*/
                 counter <= 0;
                 read_address_input <= reuse_base;
+                rden <= 1;
                 if(done_slice) begin
                     done_slice <= 0;
                     valid_add <= 1;
                     coulmn_ptr_ifmap_h <= 0;
                     normal_ptr <= 0;
                     row_ptr_ifmap_w <= 0;
+                    rden <= 1;
                     reuse_base <= reg_ifmap_w;
                 end else begin
                     reuse_base <= reuse_base + 1;
@@ -402,6 +436,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                 counter <= counter + 1;
                 row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                 valid_add <= 1;
+                rden <= 1;
             end
             1 : begin
                 normal_ptr <= normal_ptr + 1;
@@ -409,6 +444,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                 counter <= counter + 1;
                 row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                 valid_add <= 1;
+                rden <= 1;
             end
             2 : begin
                 normal_ptr <= normal_ptr + 1;
@@ -416,6 +452,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                 counter <= counter + 1;
                 row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                 valid_add <= 1;
+                rden <= 1;
             end
             3 : begin
                 counter <= 0;
@@ -427,6 +464,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                         valid_add <= 1;
                         coulmn_ptr_ifmap_h <= coulmn_ptr_ifmap_h + 1;
                         read_address_input <= normal_ptr;
+                        rden <= 1;
                         if(coulmn_ptr_ifmap_h == (total_16_coulmn_window-2)) begin
                             done_slice <= 1;
                         end
@@ -435,6 +473,7 @@ assign total_16_coulmn_window = ((reg_ifmap_h - 16) / 14)+1;
                         row_ptr_ifmap_w <= row_ptr_ifmap_w + 1;
                         valid_add <= 1;
                         read_address_input <= normal_ptr;
+                        rden <= 1;
                     end
                 end
             endcase

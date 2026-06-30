@@ -12,7 +12,7 @@ module output_buff(
 );
 
 reg [127:0] mem [8191:0]; // 8192 locations and each location is 128 bit
-
+/*
 always @(posedge clk) begin
     if(~rst_n) begin
         data_out <= 128'b0;
@@ -39,5 +39,28 @@ always @(posedge clk) begin
         default : data_valid <= 1'b0; 
         endcase
     end
+end*/
+// read
+always@(posedge clk) begin
+    if(~rst_n) begin
+        data_out <= 0;
+        data_valid <= 0;
+    end else if(block_enable) begin
+        if (RdEn) begin
+            data_out <= mem[read_address];
+            data_valid <= 1'b1;   
+        end
+        else begin
+            data_valid <= 1'b0;
+        end
+    end
+end
+// write
+always @(posedge clk) begin
+        if(WrEn) begin
+            if(valid_add) begin
+                mem[write_address] <= data_in;
+            end
+        end
 end
 endmodule

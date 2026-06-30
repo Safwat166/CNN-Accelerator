@@ -4,6 +4,7 @@ module control_buff_output(
 
     output  reg     [12:0]  write_address_output,
     output  reg             valid_add,
+    output  reg             wren,
     output  reg             valid_in
 );
 
@@ -16,12 +17,15 @@ always @ (posedge clk or negedge rst_n) begin
         out_ptr <= 0;
         write_address_output <= 0;
         valid_add <= 0;
+        wren <= 0;
     end else if (req_out_reg) begin
         write_address_output <= out_ptr;
         out_ptr <= out_ptr + 1;
         valid_add <= 1;
+        wren <= 1;
     end else begin
         valid_add <= 0;
+        wren <= 0;
     end
 end
 

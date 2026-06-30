@@ -5,26 +5,46 @@ module cnn_accelerator #(
     psums_code_request_width = 1,
     counter_width = 8
 ) (
-    // AXI interface
+    // BRAM Controller interface
+
+    // global signals
     input       wire          clk,
     input       wire          rst_n,
-    input       wire [127:0]  data_bus,
+
+    // data bus
+    input       wire [127:0]  data_bus_i,
+    input       wire [127:0]  data_bus_w,
+    input       wire [127:0]  data_bus_ps,
     output      wire [127:0]  data_bus_o,
-    input       wire [31:0]   address,
-    input       wire          rd_en_i,
-    input                     wr_en_i,
-    input       wire          rd_en_w,
-    input                     wr_en_w,
-    input       wire          rd_en_o,
-    input                     wr_en_o,
-    input       wire          rd_en_p,
-    input                     wr_en_p,
-    input                     block_enable_i,
-    input                     block_enable_w,
-    input                     block_enable_ps,
-    input                     block_enable_o,
-    input                     block_enable_r
+    output      wire [63:0]   data_bus_r_rd,
+    input       wire [63:0]   data_bus_r_wr,
+
+    // addresses
+    input       wire [31:0]   address_i,
+    input       wire [31:0]   address_w,
+    input       wire [31:0]   address_ps,
+    input       wire [31:0]   address_o,
+    input       wire [31:0]   address_r,
+
+    // write enable signals
+    input       wire [15:0]   wr_en_i,
+    input       wire [15:0]   wr_en_w,
+    input       wire [15:0]   rd_en_o,  // wr_en but inverted
+    input       wire [15:0]   wr_en_ps,
+    input       wire [7:0]    wr_en_r,
+
+    // block enable signals
+    input       wire          block_enable_i,
+    input       wire          block_enable_w,
+    input       wire          block_enable_ps,
+    input       wire          block_enable_o,
+    input       wire          block_enable_r
 );
+    wire          rd_en_i;
+    wire          rd_en_w;
+    wire          wr_en_o;
+    wire          rd_en_p;
+
 
     /*--------------------------------------------------
     -- internal signals
@@ -157,7 +177,6 @@ module cnn_accelerator #(
         .row_transition(row_transition),
         .req_3_col(req_3col),
         .read_address_input(read_address_input),
-        .initial_window(initial_window),
         .req_weight(request_weight),
         .read_address_weight(read_address_weight),
         .req_out(request_output),
@@ -169,47 +188,63 @@ module cnn_accelerator #(
         .valid_add_weight(valid_add_w),
         .valid_add_out(valid_add_o),
         .valid_add_psum(valid_add_p),
-        .done_slice(done_slice)
+        .done_slice(done_slice),
+        .rden_input(rd_en_i),
+        .rden_weight(rd_en_w),
+        .rden_ps(rd_en_p),
+        .wren_out(wr_en_o)
     );
 
     /*--------------------------------------------------
     -- Buffers
     --------------------------------------------------*/
+    wire [12:0] index_address_i;
+    assign index_address_i = address_i >> 4;
+    wire wr_en_i_1bit;
+    assign wr_en_i_1bit = |wr_en_i;
     input_buff input_buff_inst (
         .clk(clk),
         .rst_n(rst_n),
-        .WrEn(wr_en_i),
+        .WrEn(wr_en_i_1bit),
         .RdEn(rd_en_i),
-        .write_address(address),
+        .write_address(index_address_i),
         .read_address(read_address_input),
         .block_enable(block_enable_i),
-        .data_in(data_bus),
+        .data_in(data_bus_i),
         .data_out(input_activations),
         .data_valid(valid_input),
         .valid_add(valid_add_in)
     );
 
+    wire [11:0] index_address_w;
+    assign index_address_w = address_w >> 4;
+    wire wr_en_w_1bit;
+    assign wr_en_w_1bit = |wr_en_w;
     weight_buff weight_buff_inst(
         .clk(clk),
         .rst_n(rst_n),
-        .WrEn(wr_en_w),
+        .WrEn(wr_en_w_1bit),
         .RdEn(rd_en_w),
-        .write_address(address),
+        .write_address(index_address_w),
         .read_address(read_address_weight),
         .block_enable(block_enable_w),
-        .data_in(data_bus),
+        .data_in(data_bus_w[71:0]),
         .data_out(filter_in),
         .data_valid(valid_weight),
         .valid_add(valid_add_w)
     );
 
+    wire [12:0] index_address_o;
+    assign index_address_o = address_o >> 4;
+    wire rd_en_o_1bit;
+    assign rd_en_o_1bit = !(|rd_en_o);
     output_buff output_buff_inst(
         .clk(clk),
         .rst_n(rst_n),
         .WrEn(wr_en_o),
-        .RdEn(rd_en_o),
+        .RdEn(rd_en_o_1bit),
         .write_address(write_address_output),
-        .read_address(address),
+        .read_address(index_address_o),
         .block_enable(block_enable_o),
         .data_in(stream_out),
         .data_out(data_bus_o),
@@ -217,15 +252,20 @@ module cnn_accelerator #(
         .valid_add(valid_add_o)
     );
 
+
+    wire [12:0] index_address_ps;
+    assign index_address_ps = address_ps >> 4;
+    wire wr_en_ps_1bit;
+    assign wr_en_ps_1bit = |wr_en_ps;
     psum_buff psum_buff_inst(
         .clk(clk),
         .rst_n(rst_n),
-        .WrEn(wr_en_p),
+        .WrEn(wr_en_ps_1bit),
         .RdEn(rd_en_p),
-        .write_address(address),
+        .write_address(index_address_ps),
         .read_address(read_address_psum),
         .block_enable(block_enable_ps),
-        .data_in(data_bus),
+        .data_in(data_bus_ps),
         .data_out(psum_ch),
         .data_valid(psum_valid),
         .valid_add(valid_add_p)
@@ -234,13 +274,16 @@ module cnn_accelerator #(
     /*--------------------------------------------------
     -- register file
     --------------------------------------------------*/
+    wire wr_en_r_1bit;
+    assign wr_en_r_1bit = |wr_en_r;
     RegFile RegFile_inst(
         .clk(clk),
         .rst_n(rst_n),
-        .wdata(data_bus),
-        .Address_in(address),
+        .wdata(data_bus_r_wr),
+        .Address_in(address_r[4:3]),
+        .wr_en(wr_en_r_1bit),
         .block_enable_r(block_enable_r),
-        .rdata(data_bus_o),
+        .rdata(data_bus_r_rd),
         .last_location(last_location),
         .reg_ifmap_h(ifmap_h),
         .reg_ifmap_w(ifmap_w),

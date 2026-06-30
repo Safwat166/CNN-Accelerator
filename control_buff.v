@@ -9,22 +9,26 @@ module control_buff_top(
     input   wire           row_transition,
     input   wire           req_3_col,          
     output  wire     [12:0] read_address_input,
-    output  wire            initial_window,
+    //output  wire            initial_window,
     output  wire            valid_add_input,
     output  wire            done_slice,
+    output  wire            rden_input,
     // ----------- Weight Buffer  ----------------
     input   wire    [1:0]   req_weight,
     //input   wire    [7:0]   reg_filter_size,
     output  wire     [11:0]  read_address_weight,
     output  wire             valid_add_weight,
+    output  wire            rden_weight,
     // ----------- Output Buffer  ----------------
     input   wire             req_out,
     output  wire     [12:0]  write_address_output,
     output  wire             valid_in,
     output  wire             valid_add_out,
+    output  wire             wren_out,
     // ----------- Psum Buffer  ------------------
     input   wire             req_psum,
     output  wire             valid_add_psum,
+    output  wire             rden_ps,
     output  wire     [12:0]  read_address_psum
 );
 
@@ -41,8 +45,8 @@ control_buff_input instance_input(
     .req_3_col(req_3_col),          
     .read_address_input(read_address_input),
     .valid_add(valid_add_input),
-    .initial_window(initial_window),
-    .done_slice(done_slice)
+    .done_slice(done_slice),
+    .rden(rden_input)
 );
 
 // weight Buffer
@@ -52,7 +56,8 @@ control_buff_weight instance_weight(
     .req_weight(req_weight),
     .reg_filter_size(reg_filter_size),
     .read_address_weight(read_address_weight),
-    .valid_add(valid_add_weight)
+    .valid_add(valid_add_weight),
+    .rden_w(rden_weight)
 );
 
 // output Buffer
@@ -62,7 +67,8 @@ control_buff_output instance_output(
     .req_out(req_out),
     .write_address_output(write_address_output),
     .valid_in(valid_in),
-    .valid_add(valid_add_out)
+    .valid_add(valid_add_out),
+    .wren(wren_out)
 );
 
 // Psum Buffer
@@ -71,6 +77,7 @@ control_buff_psum instance_psum(
     .rst_n(rst_n),
     .req_psum(req_psum),
     .read_address_psum(read_address_psum),
+    .rden_psum(rden_ps),
     .valid_add(valid_add_psum)
 );
 endmodule
