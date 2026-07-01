@@ -2,7 +2,7 @@
 // note: tested parameters are
 // 1) ROWS = 258, COLOUMNS = 268, 3 <= FILTER_SIZE <= 12
 // 1) ROWS = 512, COLOUMNS = 520, 3 <= FILTER_SIZE <= 12
-module cnn_accelerator_tb #(parameter ROWS = 512, COLOUMNS = 520, FILTER_SIZE = 6, NUM_LOCATION = 8192) ();
+module cnn_accelerator_tb #(parameter ROWS = 512, COLOUMNS = 520, FILTER_SIZE = 12, NUM_LOCATION = 8192) ();
 
 /*--------------------------------------------------
 -- internal signals
@@ -503,7 +503,7 @@ if((ROWS == 512) && (FILTER_SIZE == 3)) begin
         wr_en_r = {8{1'b1}};
         data_bus_r_wr[7:0] = FILTER_SIZE;
         data_bus_r_wr[15:8] = 1;
-        data_bus_r_wr[28:16] = 100;
+        data_bus_r_wr[28:16] = 72;
         data_bus_r_wr[41:29] = ROWS;
         data_bus_r_wr[42] = 0;
         data_bus_r_wr[43] = 0;
@@ -528,7 +528,7 @@ if((ROWS == 512) && (FILTER_SIZE == 3)) begin
         wr_en_r = {8{1'b1}};
         data_bus_r_wr[7:0] = FILTER_SIZE;
         data_bus_r_wr[15:8] = 1;
-        data_bus_r_wr[28:16] = 100;
+        data_bus_r_wr[28:16] = 72;
         data_bus_r_wr[41:29] = ROWS;
         data_bus_r_wr[42] = 0;
         data_bus_r_wr[43] = 1;

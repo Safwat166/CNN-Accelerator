@@ -17,10 +17,6 @@ add wave -noupdate -group AXI -radix unsigned /cnn_accelerator_tb/DUT/address_w
 add wave -noupdate -group AXI -radix unsigned /cnn_accelerator_tb/DUT/address_ps
 add wave -noupdate -group AXI -radix unsigned /cnn_accelerator_tb/DUT/address_o
 add wave -noupdate -group AXI -radix unsigned /cnn_accelerator_tb/DUT/address_r
-add wave -noupdate -group AXI -color {Orange Red} -radix unsigned /cnn_accelerator_tb/DUT/index_address_i
-add wave -noupdate -group AXI -color {Orange Red} -radix unsigned /cnn_accelerator_tb/DUT/index_address_w
-add wave -noupdate -group AXI -color {Orange Red} -radix unsigned /cnn_accelerator_tb/DUT/index_address_o
-add wave -noupdate -group AXI -color {Orange Red} -radix unsigned /cnn_accelerator_tb/DUT/index_address_ps
 add wave -noupdate -group AXI /cnn_accelerator_tb/DUT/wr_en_i
 add wave -noupdate -group AXI /cnn_accelerator_tb/DUT/wr_en_w
 add wave -noupdate -group AXI /cnn_accelerator_tb/DUT/rd_en_o
@@ -42,9 +38,9 @@ add wave -noupdate -group {system states and data requests} -color Orange /cnn_a
 add wave -noupdate -group {system states and data requests} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/request_input
 add wave -noupdate -group {system states and data requests} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/request_weight
 add wave -noupdate -group {system states and data requests} -color Orange /cnn_accelerator_tb/DUT/controller_top_inst/request_output
-add wave -noupdate -group {generated addresses} -color Cyan -radix unsigned /cnn_accelerator_tb/DUT/control_buff_inst/read_address_input
-add wave -noupdate -group {generated addresses} -color Cyan -radix unsigned /cnn_accelerator_tb/DUT/control_buff_inst/read_address_weight
-add wave -noupdate -group {generated addresses} -color Cyan -radix unsigned /cnn_accelerator_tb/DUT/control_buff_inst/write_address_output
+add wave -noupdate -expand -group {generated addresses} -color Cyan -radix unsigned /cnn_accelerator_tb/DUT/control_buff_inst/read_address_input
+add wave -noupdate -expand -group {generated addresses} -color Cyan -radix unsigned /cnn_accelerator_tb/DUT/control_buff_inst/read_address_weight
+add wave -noupdate -expand -group {generated addresses} -color Cyan -radix unsigned /cnn_accelerator_tb/DUT/control_buff_inst/write_address_output
 add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/en_op
 add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/comp_inst/clear_pe
 add wave -noupdate -group {operational signals} -color Thistle /cnn_accelerator_tb/DUT/load_done
@@ -69,7 +65,7 @@ add wave -noupdate -group {output buffer} /cnn_accelerator_tb/DUT/output_buff_in
 add wave -noupdate -group {output buffer} /cnn_accelerator_tb/DUT/output_buff_inst/block_enable
 add wave -noupdate -group {output buffer} /cnn_accelerator_tb/DUT/control_buff_inst/instance_output/wren
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {21185000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {1818210961 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 234
 configure wave -valuecolwidth 112
@@ -85,4 +81,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {1521969750 ps}
+WaveRestoreZoom {0 ps} {6089112750 ps}
